@@ -17,17 +17,5 @@ jobs:
           chmod +x kubeaudit
 
       - name: Run kubeaudit and annotate PR
-        run: |
-          # 输出 JSON
-          ./kubeaudit all -f deployment.yml --format json > report.json
-
-          # 解析 JSON 并生成 GitHub Annotation
-          python3 <<'EOF'
-          import json, sys
-          report = json.load(open("report.json"))
-          for r in report.get("Results", []):
-              level = r.get("Level", "error")   # warning / error / info
-              msg = r.get("Message", "")
-              file = r.get("File", "deployment.yml")
-              print(f"::{level} file={file}:: {msg}")
-          EOF
+        run:  |
+          ./kubeaudit all -f deployment.yml
