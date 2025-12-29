@@ -1,0 +1,23 @@
+name: kubeaudit PR check
+
+on:
+  pull_request:
+
+jobs:
+  kubeaudit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download kubeaudit
+        run: |
+          curl -sLf -o kubeaudit.tar.gz \
+            https://github.com/Shopify/kubeaudit/releases/download/v0.7.0/kubeaudit_0.7.0_linux_amd64.tar.gz
+          tar -zxvf kubeaudit.tar.gz
+          chmod +x kubeaudit
+
+      - name: Run kubeaudit nonroot check
+        run: |
+          ./kubeaudit nonroot deployment.yml
