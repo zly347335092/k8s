@@ -20,4 +20,4 @@ jobs:
 
       - name: Run kubeaudit nonroot check
         run: |
-          ./kubeaudit all --local deployment.yml
+          ./kubeaudit all -f deployment.yml
