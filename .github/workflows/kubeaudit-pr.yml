@@ -8,16 +8,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Download kubeaudit
         run: |
-          curl -sLf -o kubeaudit.tar.gz \
-            https://github.com/Shopify/kubeaudit/releases/download/v0.7.0/kubeaudit_0.7.0_linux_amd64.tar.gz
+          curl -sLf -o kubeaudit.tar.gz https://github.com/Shopify/kubeaudit/releases/download/v0.7.0/kubeaudit_0.7.0_linux_amd64.tar.gz
           tar -zxvf kubeaudit.tar.gz
           chmod +x kubeaudit
 
-      - name: Run kubeaudit nonroot check
+      - name: Run kubeaudit and annotate PR
         run: |
-          ./kubeaudit all -f deployment.yml
+          # 输出 JSON
+          ./kubeaudit all -f deployment.yml -o json > report.json
+
+          # 解析 JSON 并生成 GitHub Annotation
+          python3 <<'EOF'
+          import json, sys
+          report = json.load(open("report.json"))
+          for r in report.get("Results", []):
+              level = r.get("Level", "error")   # warning / error / info
+              msg = r.get("Message", "")
+              file = r.get("File", "deployment.yml")
+              print(f"::{level} file={file}:: {msg}")
+          EOF
